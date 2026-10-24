@@ -1,7 +1,6 @@
 // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // Your Firebase configuration keys
 const firebaseConfig = {
@@ -17,7 +16,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 console.log("Firebase connected successfully to TerraLog!");
 
@@ -28,13 +26,13 @@ const closeSidebarBtn = document.getElementById("closeSidebar");
 
 if (openSidebarBtn && sidebar) {
   openSidebarBtn.addEventListener("click", () => {
-    sidebar.classList.add("active"); // Opens sidebar
+    sidebar.classList.add("active");
   });
 }
 
 if (closeSidebarBtn && sidebar) {
   closeSidebarBtn.addEventListener("click", () => {
-    sidebar.classList.remove("active"); // Closes sidebar
+    sidebar.classList.remove("active");
   });
 }
 
@@ -54,7 +52,7 @@ if (openModalSidebar && modalOverlay) {
   openModalSidebar.addEventListener("click", (e) => {
     e.preventDefault();
     modalOverlay.style.display = "flex";
-    if (sidebar) sidebar.classList.remove("active"); // Close sidebar when clicked
+    if (sidebar) sidebar.classList.remove("active");
   });
 }
 
@@ -64,7 +62,7 @@ if (cancelModal && modalOverlay) {
   });
 }
 
-// --- 3. SAVE SIGHTING TO CLOUD ---
+// --- 3. SAVE SIGHTING DIRECTLY TO FIRESTORE ---
 const sightingForm = document.getElementById("sightingForm");
 
 if (sightingForm) {
@@ -82,12 +80,17 @@ if (sightingForm) {
 
       let imageUrl = "";
 
+      // Convert image file into a direct data string (No Storage bucket needed!)
       if (photoFile) {
-        const storageRef = ref(storage, `nature_photos/${Date.now()}_${photoFile.name}`);
-        const snapshot = await uploadBytes(storageRef, photoFile);
-        imageUrl = await getDownloadURL(snapshot.ref);
+        imageUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(photoFile);
+        });
       }
 
+      // Save everything right into your Firestore database
       await addDoc(collection(db, "sightings"), {
         explorerName: explorerName,
         category: category,
