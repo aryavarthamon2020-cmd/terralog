@@ -21,15 +21,57 @@ const storage = getStorage(app);
 
 console.log("Firebase connected successfully to TerraLog!");
 
-// Handle form submission and save to Cloud Firestore & Storage
+// --- 1. SIDEBAR MENU CONTROLS ---
+const sidebar = document.getElementById("sidebar");
+const openSidebarBtn = document.getElementById("openSidebar");
+const closeSidebarBtn = document.getElementById("closeSidebar");
+
+if (openSidebarBtn && sidebar) {
+  openSidebarBtn.addEventListener("click", () => {
+    sidebar.classList.add("active"); // Opens sidebar
+  });
+}
+
+if (closeSidebarBtn && sidebar) {
+  closeSidebarBtn.addEventListener("click", () => {
+    sidebar.classList.remove("active"); // Closes sidebar
+  });
+}
+
+// --- 2. POP-UP MODAL CONTROLS (+ Sighting) ---
+const modalOverlay = document.getElementById("modalOverlay");
+const openModalBtn = document.getElementById("openModalBtn");
+const openModalSidebar = document.getElementById("openModalSidebar");
+const cancelModal = document.getElementById("cancelModal");
+
+if (openModalBtn && modalOverlay) {
+  openModalBtn.addEventListener("click", () => {
+    modalOverlay.style.display = "flex";
+  });
+}
+
+if (openModalSidebar && modalOverlay) {
+  openModalSidebar.addEventListener("click", (e) => {
+    e.preventDefault();
+    modalOverlay.style.display = "flex";
+    if (sidebar) sidebar.classList.remove("active"); // Close sidebar when clicked
+  });
+}
+
+if (cancelModal && modalOverlay) {
+  cancelModal.addEventListener("click", () => {
+    modalOverlay.style.display = "none";
+  });
+}
+
+// --- 3. SAVE SIGHTING TO CLOUD ---
 const sightingForm = document.getElementById("sightingForm");
 
 if (sightingForm) {
   sightingForm.addEventListener("submit", async function(event) {
-    event.preventDefault(); // Stops the page from refreshing
+    event.preventDefault(); // Stops page from refreshing
 
     try {
-      // Grab values from your exact HTML form IDs
       const explorerName = document.getElementById("explorerName").value;
       const category = document.getElementById("sightingCategory").value;
       const commonName = document.getElementById("commonName").value;
@@ -40,14 +82,12 @@ if (sightingForm) {
 
       let imageUrl = "";
 
-      // If a photo was selected, upload it to Firebase Storage
       if (photoFile) {
         const storageRef = ref(storage, `nature_photos/${Date.now()}_${photoFile.name}`);
         const snapshot = await uploadBytes(storageRef, photoFile);
         imageUrl = await getDownloadURL(snapshot.ref);
       }
 
-      // Save all details into your Firestore database
       await addDoc(collection(db, "sightings"), {
         explorerName: explorerName,
         category: category,
@@ -61,9 +101,7 @@ if (sightingForm) {
 
       alert("Sighting published to the cloud successfully! 🌿");
       
-      // Reset form and close modal popup
       sightingForm.reset();
-      const modalOverlay = document.getElementById("modalOverlay");
       if (modalOverlay) {
         modalOverlay.style.display = "none";
       }
