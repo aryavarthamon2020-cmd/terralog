@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TerraLog - Biodiversity Field Guide</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sliding Sidebar / Drawer -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <img src="03logo.png" alt="Logo" class="sidebar-logo-img">
+                <h2>TerraLog</h2>
+            </div>
+            <button id="closeSidebar" class="icon-btn">✕</button>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#" class="menu-item active" data-view="feed" data-category="all">🌍 All Observations</a>
+            <a href="#" class="menu-item" data-view="feed" data-category="plants">🌿 Plants & Flora</a>
+            <a href="#" class="menu-item" data-view="feed" data-category="insects">🐛 Insects & Bugs</a>
+            <a href="#" class="menu-item" data-view="feed" data-category="reptiles">🐍 Reptiles & Amphibians</a>
+            <a href="#" class="menu-item" data-view="leaderboard" data-category="">🏆 Explorer Rankings</a>
+            <div class="sidebar-divider"></div>
+            <a href="#" class="menu-item" id="openModalSidebar">📤 Upload Image</a>
+            <a href="#" class="menu-item">🖼️ Your Gallery</a>
+            <a href="#" class="menu-item">📜 Terms and Policy</a>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-profile-badge">
+                <span>👤</span> <span>Vasudev (Explorer)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="main-content">
+        
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <button id="openSidebar" class="icon-btn">☰</button>
+                <div class="brand-container">
+                    <img src="03logo.png" alt="TerraLog Logo" class="nav-logo-img">
+                    <span class="app-name">TerraLog</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <input type="text" id="searchInput" placeholder="Search sightings..." class="search-input">
+                <button id="openModalBtn" class="primary-btn">+ Sighting</button>
+            </div>
+        </header>
+        <div class="colorful-underline"></div>
+
+        <!-- Hero Banner (Top 1/3 portion with light green glass look) -->
+        <section class="hero-banner" id="heroBanner">
+            <div class="hero-glass-overlay">
+                <div class="hero-content">
+                    <h2>Nature & Community Discoveries</h2>
+                    <p>Log wildlife, check vibe ratings, and climb the ranks.</p>
+                    <div class="hero-actions">
+                        <button class="hero-btn active-tab" id="feedTabBtn">🌍 Live Feed</button>
+                        <button class="hero-btn" id="rankTabBtn">🏆 View Rankings</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Area -->
+        <main class="content-container" id="contentContainer">
+            <!-- Content injects here -->
+        </main>
+    </div>
+
+    <!-- Popup Modal for Adding New Sighting -->
+    <div class="modal-overlay" id="modalOverlay" style="display: none;">
+        <div class="modal">
+            <h3>Record New Wildlife Sighting</h3>
+            <form id="sightingForm">
+                <label>Your Name (Explorer):</label>
+                <input type="text" id="explorerName" placeholder="e.g., Vasudev" required>
+
+                <label>Category:</label>
+                <select id="sightingCategory">
+                    <option value="plants">Plants & Flora</option>
+                    <option value="insects">Insects & Bugs</option>
+                    <option value="reptiles">Reptiles & Amphibians</option>
+                    <option value="birds">Birds & Avian</option>
+                </select>
+
+                <label>Upload Photo:</label>
+                <input type="file" id="sightingPhoto" accept="image/*" required>
+
+                <label>Common Name:</label>
+                <input type="text" id="commonName" placeholder="e.g., Garden Beetle" required>
+
+                <label>Species (Binomial Name):</label>
+                <input type="text" id="speciesName" placeholder="e.g., Chrysolina Americana">
+
+                <label>🔥 Spicy or Safe? Vibe Meter:</label>
+                <select id="vibeMeter" required>
+                    <option value="chill">🟢 100% Chill / Friend (Harmless)</option>
+                    <option value="caution">🟡 Look, Don't Touch (Itchy/Annoying)</option>
+                    <option value="spicy">🔴 Spicy / Run Away (Dangerous/Venomous)</option>
+                </select>
+
+                <label>Genus & Family:</label>
+                <input type="text" id="familyField" placeholder="e.g., Chrysomelidae">
+
+                <div class="modal-actions">
+                    <button type="button" id="cancelModal" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
