@@ -480,3 +480,10 @@ body, html {
     gap: 8px;
     margin-top: 8px;
 }
+/* Add background image to your Hero Banner */
+.hero-banner {
+  background-image: url('01bug.png'); /* You can change this to '02ant.png' if you prefer the ant! */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
