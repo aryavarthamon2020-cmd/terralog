@@ -21,37 +21,28 @@ console.log("Firebase connected successfully to TerraLog!");
 
 // --- 1. SIDEBAR MENU CONTROLS ---
 const sidebar = document.getElementById("sidebar");
-const openSidebarBtns = document.querySelectorAll("#openSidebar"); // Handles multiple elements with ID if present
+const openSidebarBtn = document.getElementById("openSidebar");
 const closeSidebarBtn = document.getElementById("closeSidebar");
+const openModalSidebar = document.getElementById("openModalSidebar");
 
-openSidebarBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    if (sidebar) sidebar.classList.add("active");
+if (openSidebarBtn && sidebar) {
+  openSidebarBtn.addEventListener("click", () => {
+    sidebar.classList.add("active");
+    sidebar.style.display = "block";
+    sidebar.style.transform = "translateX(0)";
   });
-});
+}
 
 if (closeSidebarBtn && sidebar) {
   closeSidebarBtn.addEventListener("click", () => {
     sidebar.classList.remove("active");
+    sidebar.style.transform = "translateX(-100%)";
   });
 }
-
-// Close sidebar when clicking outside or on menu links if desired
-window.addEventListener("click", (e) => {
-  if (sidebar && sidebar.classList.contains("active")) {
-    // If click is outside sidebar and not on any open sidebar button
-    let clickedInside = sidebar.contains(e.target);
-    let clickedButton = Array.from(openSidebarBtns).some(btn => btn.contains(e.target));
-    if (!clickedInside && !clickedButton) {
-      sidebar.classList.remove("active");
-    }
-  }
-});
 
 // --- 2. POP-UP MODAL CONTROLS (+ Sighting) ---
 const modalOverlay = document.getElementById("modalOverlay");
 const openModalBtn = document.getElementById("openModalBtn");
-const openModalSidebar = document.getElementById("openModalSidebar");
 const cancelModal = document.getElementById("cancelModal");
 
 if (openModalBtn && modalOverlay) {
@@ -64,7 +55,10 @@ if (openModalSidebar && modalOverlay) {
   openModalSidebar.addEventListener("click", (e) => {
     e.preventDefault();
     modalOverlay.style.display = "flex";
-    if (sidebar) sidebar.classList.remove("active");
+    if (sidebar) {
+      sidebar.classList.remove("active");
+      sidebar.style.transform = "translateX(-100%)";
+    }
   });
 }
 
@@ -95,7 +89,7 @@ async function loadSightings() {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       html += `
-        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e0e0e0; transition: transform 0.2s;">
+        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
           ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Wildlife photo" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">` : ''}
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${data.category || 'Nature'}</span>
@@ -140,7 +134,6 @@ if (sightingForm) {
 
       let imageUrl = "";
 
-      // Convert photo file to a secure direct data string (bypassing storage bucket CORS errors)
       if (photoFile) {
         imageUrl = await new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -150,7 +143,6 @@ if (sightingForm) {
         });
       }
 
-      // Save record to Firestore
       await addDoc(collection(db, "sightings"), {
         explorerName: explorerName,
         category: category,
@@ -164,13 +156,11 @@ if (sightingForm) {
 
       alert("Sighting published to the cloud successfully! 🌿");
       
-      // Reset form and close modal
       sightingForm.reset();
       if (modalOverlay) {
         modalOverlay.style.display = "none";
       }
 
-      // Refresh the feed to show the new log instantly
       loadSightings();
 
     } catch (error) {
