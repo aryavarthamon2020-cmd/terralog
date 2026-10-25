@@ -17,30 +17,35 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-console.log("Firebase connected successfully to TerraLog!");
+console.log("TerraLog initialized successfully!");
 
-// --- 1. SIDEBAR MENU CONTROLS ---
+// --- 1. SIDEBAR NAVIGATION CONTROLS ---
 const sidebar = document.getElementById("sidebar");
 const openSidebarBtn = document.getElementById("openSidebar");
 const closeSidebarBtn = document.getElementById("closeSidebar");
-const openModalSidebar = document.getElementById("openModalSidebar");
 
 if (openSidebarBtn && sidebar) {
-  openSidebarBtn.addEventListener("click", () => {
+  openSidebarBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     sidebar.classList.add("active");
-    sidebar.style.display = "block";
-    sidebar.style.transform = "translateX(0)";
   });
 }
 
 if (closeSidebarBtn && sidebar) {
   closeSidebarBtn.addEventListener("click", () => {
     sidebar.classList.remove("active");
-    sidebar.style.transform = "translateX(-100%)";
   });
 }
 
-// --- 2. POP-UP MODAL CONTROLS (+ Sighting) ---
+window.addEventListener("click", (e) => {
+  if (sidebar && sidebar.classList.contains("active")) {
+    if (!sidebar.contains(e.target) && !openSidebarBtn.contains(e.target)) {
+      sidebar.classList.remove("active");
+    }
+  }
+});
+
+// --- 2. MODAL CONTROLS (+ Sighting) ---
 const modalOverlay = document.getElementById("modalOverlay");
 const openModalBtn = document.getElementById("openModalBtn");
 const cancelModal = document.getElementById("cancelModal");
@@ -51,55 +56,172 @@ if (openModalBtn && modalOverlay) {
   });
 }
 
-if (openModalSidebar && modalOverlay) {
-  openModalSidebar.addEventListener("click", (e) => {
-    e.preventDefault();
-    modalOverlay.style.display = "flex";
-    if (sidebar) {
-      sidebar.classList.remove("active");
-      sidebar.style.transform = "translateX(-100%)";
-    }
-  });
-}
-
 if (cancelModal && modalOverlay) {
   cancelModal.addEventListener("click", () => {
     modalOverlay.style.display = "none";
   });
 }
 
-// --- 3. FETCH & DISPLAY LIVE FEED FROM DATABASE ---
+// --- 3. RANKINGS MODAL CONTROLS ---
+const rankingsModal = document.getElementById("rankingsModal");
+const openRankingsBtn = document.getElementById("openRankingsBtn");
+const closeRankingsBtn = document.getElementById("closeRankingsBtn");
+const rankingsContainer = document.getElementById("rankingsContainer");
+
+if (openRankingsBtn && rankingsModal) {
+  openRankingsBtn.addEventListener("click", async () => {
+    rankingsModal.style.display = "flex";
+    await loadRankings();
+  });
+}
+
+if (closeRankingsBtn && rankingsModal) {
+  closeRankingsBtn.addEventListener("click", () => {
+    rankingsModal.style.display = "none";
+  });
+}
+
+async function loadRankings() {
+  rankingsContainer.innerHTML = "<p style='text-align:center; color:#94a3b8;'>Calculating leaderboard...</p>";
+  try {
+    const querySnapshot = await getDocs(collection(db, "sightings"));
+    if (querySnapshot.empty) {
+      rankingsContainer.innerHTML = "<p style='text-align:center; color:#94a3b8;'>No rankings available yet. Be the first explorer to log a sighting!</p>";
+      return;
+    }
+
+    const counts = {};
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      const name = data.explorerName || "Anonymous Explorer";
+      counts[name] = (counts[name] || 0) + 1;
+    });
+
+    const sortedExplorers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    let html = "";
+    sortedExplorers.forEach(([name, count], index) => {
+      let badge = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏅";
+      html += `
+        <div class="rank-item">
+          <div>
+            <span style="font-weight:bold; color:#86efac; margin-right:10px;">${badge} #${index + 1}</span>
+            <span style="color:#f8fafc; font-weight:600;">${name}</span>
+          </div>
+          <div style="background:#166534; color:#86efac; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">
+            ${count} ${count === 1 ? 'Sighting' : 'Sightings'}
+          </div>
+        </div>
+      `;
+    });
+    rankingsContainer.innerHTML = html;
+  } catch (error) {
+    console.error("Error loading rankings:", error);
+    rankingsContainer.innerHTML = "<p style='text-align:center; color:#f87171;'>Failed to load rankings.</p>";
+  }
+}
+
+// --- 4. CATEGORY MODAL & FILTERING FROM SIDEBAR ---
+const categoryModal = document.getElementById("categoryModal");
+const closeCategoryBtn = document.getElementById("closeCategoryBtn");
+const categoryContainer = document.getElementById("categoryContainer");
+const categoryModalTitle = document.getElementById("categoryModalTitle");
+
+const categoryLinks = document.querySelectorAll("#categoryList a");
+categoryLinks.forEach(link => {
+  link.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const selectedCat = link.getAttribute("data-category");
+    if (sidebar) sidebar.classList.remove("active");
+    
+    categoryModalTitle.textContent = `${selectedCat} Sightings`;
+    categoryModal.style.display = "flex";
+    await loadCategorySightings(selectedCat);
+  });
+});
+
+if (closeCategoryBtn && categoryModal) {
+  closeCategoryBtn.addEventListener("click", () => {
+    categoryModal.style.display = "none";
+  });
+}
+
+async function loadCategorySightings(categoryName) {
+  categoryContainer.innerHTML = "<p style='text-align:center; color:#94a3b8; padding:20px;'>Filtering logs...</p>";
+  try {
+    const q = query(collection(db, "sightings"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    const filtered = [];
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.category === categoryName) {
+        filtered.push(data);
+      }
+    });
+
+    if (filtered.length === 0) {
+      categoryContainer.innerHTML = `<p style='text-align:center; color:#94a3b8; padding:30px;'>No logs found under '${categoryName}' yet.</p>`;
+      return;
+    }
+
+    let html = '<div class="feed-grid">';
+    filtered.forEach(data => {
+      html += `
+        <div class="sighting-card">
+          ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Wildlife photo" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">` : ''}
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="background: #166534; color: #86efac; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${data.category}</span>
+            <span style="font-size: 11px; color: #cbd5e1;">Vibe: ${data.vibeMeter || 'N/A'}</span>
+          </div>
+          <h3 style="margin: 4px 0 2px 0; font-size: 16px; color: #fff;">${data.commonName || 'Untitled'}</h3>
+          <p style="margin: 0 0 8px 0; font-size: 12px; color: #94a3b8; font-style: italic;">${data.speciesName || ''}</p>
+          ${data.familyField ? `<p style="margin: 0 0 6px 0; font-size: 12px; color: #cbd5e1;"><strong>Family:</strong> ${data.familyField}</p>` : ''}
+          <hr style="border: none; border-top: 1px solid #166534; margin: 8px 0;">
+          <p style="margin: 0; font-size: 11px; color: #94a3b8;">Explorer: <strong>${data.explorerName || 'Anonymous'}</strong></p>
+        </div>
+      `;
+    });
+    html += '</div>';
+    categoryContainer.innerHTML = html;
+  } catch (error) {
+    console.error("Error loading category sightings:", error);
+    categoryContainer.innerHTML = "<p style='text-align:center; color:#f87171;'>Failed to load filtered logs.</p>";
+  }
+}
+
+// --- 5. FETCH & DISPLAY MAIN LIVE FEED ---
 async function loadSightings() {
   const container = document.getElementById("contentContainer");
   if (!container) return;
 
-  container.innerHTML = "<p style='text-align:center; padding:20px; color:#555;'>Loading nature logs from cloud...</p>";
+  container.innerHTML = "<p style='text-align:center; padding:20px; color:#94a3b8;'>Loading nature logs from cloud...</p>";
 
   try {
     const q = query(collection(db, "sightings"), orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
-      container.innerHTML = "<p style='text-align:center; padding:40px; color:#666;'>No sightings yet. Click '+ Sighting' to publish your first one! 🌿</p>";
+      container.innerHTML = "<p style='text-align:center; padding:40px; color:#cbd5e1;'>No sightings yet. Click '+ Sighting' to publish your first one! 🌿</p>";
       return;
     }
 
-    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px;">';
+    let html = '<div class="feed-grid">';
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       html += `
-        <div style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e0e0e0;">
+        <div class="sighting-card">
           ${data.imageUrl ? `<img src="${data.imageUrl}" alt="Wildlife photo" style="width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">` : ''}
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${data.category || 'Nature'}</span>
-            <span style="font-size: 12px; color: #666;">Vibe: ${data.vibeMeter || 'N/A'}</span>
+            <span style="background: #166534; color: #86efac; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase;">${data.category || 'Nature'}</span>
+            <span style="font-size: 12px; color: #cbd5e1;">Vibe: ${data.vibeMeter || 'N/A'}</span>
           </div>
-          <h3 style="margin: 5px 0 2px 0; font-size: 18px; color: #222;">${data.commonName || 'Untitled'}</h3>
-          <p style="margin: 0 0 10px 0; font-size: 13px; color: #666; font-style: italic;">${data.speciesName || ''}</p>
-          ${data.familyField ? `<p style="margin: 0 0 8px 0; font-size: 12px; color: #555;"><strong>Family:</strong> ${data.familyField}</p>` : ''}
-          <hr style="border: none; border-top: 1px solid #eee; margin: 10px 0;">
-          <p style="margin: 0; font-size: 12px; color: #888;">Explorer: <strong>${data.explorerName || 'Anonymous'}</strong></p>
+          <h3 style="margin: 5px 0 2px 0; font-size: 18px; color: #fff;">${data.commonName || 'Untitled'}</h3>
+          <p style="margin: 0 0 10px 0; font-size: 13px; color: #94a3b8; font-style: italic;">${data.speciesName || ''}</p>
+          ${data.familyField ? `<p style="margin: 0 0 8px 0; font-size: 12px; color: #cbd5e1;"><strong>Family:</strong> ${data.familyField}</p>` : ''}
+          <hr style="border: none; border-top: 1px solid #166534; margin: 10px 0;">
+          <p style="margin: 0; font-size: 12px; color: #94a3b8;">Explorer: <strong>${data.explorerName || 'Anonymous'}</strong></p>
         </div>
       `;
     });
@@ -109,14 +231,13 @@ async function loadSightings() {
 
   } catch (error) {
     console.error("Error loading sightings:", error);
-    container.innerHTML = "<p style='text-align:center; color:red; padding:20px;'>Failed to load feed. Check F12 console.</p>";
+    container.innerHTML = "<p style='text-align:center; color:#f87171; padding:20px;'>Failed to load feed. Check F12 console.</p>";
   }
 }
 
-// Load feed automatically when page opens
 loadSightings();
 
-// --- 4. SAVE SIGHTING TO CLOUD & REFRESH FEED ---
+// --- 6. SAVE SIGHTING TO CLOUD & REFRESH ---
 const sightingForm = document.getElementById("sightingForm");
 
 if (sightingForm) {

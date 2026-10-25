@@ -1,15 +1,54 @@
-/* --- 1. GLOBAL STYLES & FORCED BACKGROUND IMAGE --- */
+/* --- 1. GLOBAL STYLES & DARKER GREEN THEME --- */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-image: url('01bug.png') !important;
+  background-image: linear-gradient(rgba(10, 30, 12, 0.8), rgba(10, 30, 12, 0.9)), url('01bug.png') !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed !important;
-  color: #333;
+  color: #e2e8f0;
   min-height: 100vh;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* Leaf decorative pattern accents */
+.hero-section {
+  background: rgba(15, 45, 20, 0.9);
+  border: 1px solid #166534;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "🌿 🍃 🌿 🍃";
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  font-size: 18px;
+  opacity: 0.35;
+  letter-spacing: 4px;
+}
+
+.hero-section h2 {
+  margin: 0 0 8px 0;
+  color: #86efac;
+  font-size: 24px;
+}
+
+.hero-section p {
+  margin: 0 0 15px 0;
+  color: #cbd5e1;
+  font-size: 14px;
 }
 
 /* --- 2. HEADER & NAVBAR --- */
@@ -17,13 +56,15 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px 24px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: rgba(11, 35, 15, 0.95);
+  border-bottom: 2px solid #166534;
+  padding: 12px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  width: 100%;
 }
 
 .logo-area {
@@ -33,18 +74,31 @@ header {
 }
 
 .logo-area img {
-  height: 40px;
-  width: 40px;
+  height: 38px;
+  width: 38px;
   object-fit: contain;
 }
 
-.menu-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #2e7d32;
+.logo-area h1 {
+  font-size: 20px;
+  margin: 0;
+  color: #86efac;
   font-weight: bold;
+}
+
+.menu-btn {
+  background: #14532d;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #86efac;
+  padding: 6px 10px;
+  transition: background 0.2s;
+}
+
+.menu-btn:hover {
+  background: #166534;
 }
 
 /* --- 3. SIDEBAR NAVIGATION MENU --- */
@@ -52,13 +106,14 @@ header {
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: 280px;
   height: 100%;
-  background: #ffffff;
-  box-shadow: 5px 0 20px rgba(0,0,0,0.15);
+  background: #0d2311;
+  border-right: 2px solid #166534;
+  box-shadow: 8px 0 30px rgba(0,0,0,0.6);
   transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  z-index: 1000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3000;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -73,15 +128,15 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #166534;
+  padding-bottom: 12px;
 }
 
 .sidebar-header h2 {
   margin: 0;
-  font-size: 20px;
-  color: #2e7d32;
+  font-size: 18px;
+  color: #86efac;
 }
 
 .close-sidebar {
@@ -89,82 +144,131 @@ header {
   border: none;
   font-size: 22px;
   cursor: pointer;
-  color: #666;
+  color: #94a3b8;
+}
+
+.close-sidebar:hover {
+  color: #fff;
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #4ade80;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .sidebar-links {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 auto 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  overflow-y: auto;
 }
 
 .sidebar-links a {
   text-decoration: none;
-  color: #333;
+  color: #cbd5e1;
   font-weight: 600;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 8px;
   transition: all 0.2s;
   display: block;
+  font-size: 14px;
+  background: rgba(20, 83, 45, 0.3);
+  border: 1px solid transparent;
 }
 
 .sidebar-links a:hover {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding-left: 18px;
+  background: rgba(22, 101, 52, 0.7);
+  color: #86efac;
+  border-color: #22c55e;
+  padding-left: 16px;
+}
+
+.sidebar-footer {
+  margin-top: 15px;
+  border-top: 1px solid #166534;
+  background: rgba(5, 20, 8, 0.6);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.sidebar-footer p {
+  margin: 4px 0;
+  color: #cbd5e1;
+}
+
+.sidebar-footer strong {
+  color: #86efac;
 }
 
 /* --- 4. MAIN LAYOUT & CONTAINER --- */
 .main-container {
   max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
+  margin: 25px auto;
+  padding: 0 15px;
 }
 
-/* --- 5. POP-UP MODAL STYLING (+ SIGHTING) --- */
-#modalOverlay {
+.hero-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* --- 5. MODALS OVERLAYS --- */
+#modalOverlay, .custom-modal-overlay {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: 4000;
   padding: 15px;
-  box-sizing: border-box;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
 }
 
 .modal-content {
-  background: #ffffff;
+  background: #0d2311;
+  border: 1px solid #166534;
   padding: 25px;
   border-radius: 14px;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   max-height: 90vh;
   overflow-y: auto;
-  box-sizing: border-box;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  margin: auto;
+  color: #e2e8f0;
+}
+
+.wide-modal {
+  max-width: 750px;
 }
 
 .modal-content h2 {
   margin-top: 0;
-  color: #2e7d32;
-  font-size: 22px;
+  color: #86efac;
+  font-size: 20px;
   margin-bottom: 15px;
+  border-bottom: 1px solid #166534;
+  padding-bottom: 10px;
 }
 
 .modal-content label {
   display: block;
   font-weight: 600;
-  font-size: 13px;
-  color: #444;
+  font-size: 12px;
+  color: #cbd5e1;
   margin-top: 12px;
 }
 
@@ -174,22 +278,23 @@ header {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #166534;
   border-radius: 8px;
-  box-sizing: border-box;
   font-size: 14px;
   outline: none;
+  background: #051408;
+  color: #fff;
 }
 
 .modal-content input:focus,
 .modal-content select:focus {
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.15);
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 .modal-content select option {
-  background: #0f172a;
-  color: white;
+  background: #0d2311;
+  color: #fff;
 }
 
 .modal-actions {
@@ -200,31 +305,85 @@ header {
 }
 
 .btn-primary {
-  background: #2e7d32;
-  color: white;
-  border: none;
+  background: #166534;
+  color: #86efac;
+  border: 1px solid #22c55e;
   padding: 10px 18px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 14px;
   transition: background 0.2s;
 }
 
 .btn-primary:hover {
-  background: #1b5e20;
+  background: #14532d;
+  color: #fff;
 }
 
 .btn-secondary {
-  background: #e0e0e0;
-  color: #333;
-  border: none;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #475569;
   padding: 10px 18px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 14px;
   transition: background 0.2s;
 }
 
 .btn-secondary:hover {
-  background: #d0d0d0;
+  background: #334155;
+  color: #fff;
+}
+
+/* --- 6. FEED & RANKINGS CARD STYLING --- */
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.sighting-card {
+  background: rgba(13, 35, 17, 0.92);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  border: 1px solid #166534;
+  transition: transform 0.2s;
+}
+
+.sighting-card:hover {
+  transform: translateY(-3px);
+  border-color: #22c55e;
+}
+
+.rank-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(5, 20, 8, 0.8);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #166534;
+}
+
+/* --- 7. MOBILE RESPONSIVE ADJUSTMENTS --- */
+@media (max-width: 600px) {
+  header {
+    padding: 10px 14px;
+  }
+  .logo-area h1 {
+    font-size: 17px;
+  }
+  .logo-area img {
+    height: 32px;
+    width: 32px;
+  }
+  .modal-content {
+    padding: 18px;
+    max-height: 92vh;
+  }
 }
